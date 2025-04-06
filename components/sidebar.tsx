@@ -15,7 +15,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { signOut } from "next-auth/react";
 import { Separator } from "./ui/separator";
 
@@ -127,30 +127,26 @@ export function Sidebar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 text-sm rounded-md transition-all duration-300 ease-in-out",
-                    isActive
-                      ? "bg-pink-50 text-pink-700 dark:bg-pink-950/50 dark:text-pink-300"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                    collapsed
-                      ? "justify-center p-2 w-12 h-12"
-                      : "justify-start p-3 w-auto"
-                  )}
+                  className={buttonVariants({
+                    variant: "ghostStart",
+                    size: collapsed ? "icon" : "default",
+                    className: cn(
+                      "items-start w-full",
+                      !collapsed && "justify-start",
+                      collapsed && "justify-center",
+                      isActive &&
+                        "bg-pink-50 text-pink-700 dark:bg-pink-950/50 dark:text-pink-300"
+                    ),
+                  })}
                 >
                   <item.icon
                     className={cn(
-                      "h-6 w-6 transition-transform duration-300 ease-in-out flex-shrink-0",
-                      isActive && "scale-110"
+                      "w-6 h-6",
+                      collapsed && "w-8 h-8",
+                      isActive && "text-pink-700"
                     )}
                   />
-                  <span
-                    className={cn(
-                      "transition-all duration-300 ease-in-out",
-                      collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
-                    )}
-                  >
-                    {item.name}
-                  </span>
+                  {!collapsed && <span className="ml-2">{item.name}</span>}
                 </Link>
               </li>
             );
@@ -159,7 +155,7 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom actions */}
-      <div className="mt-auto border-t p-4">
+      <div className="mt-auto border-t p-2 ">
         <div className="flex items-center gap-2">
           {!collapsed ? (
             <>
@@ -167,7 +163,7 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-foreground w-12 h-12"
+                className="text-muted-foreground hover:text-foreground justify-center w-12 h-12"
                 onClick={toggleCollapsed}
               >
                 <PanelLeft
@@ -183,7 +179,7 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-foreground w-12 h-12"
+                className="text-muted-foreground hover:text-foreground justify-center w-12 h-12"
                 onClick={bottomActions[0].action}
               >
                 <MessageSquare className="h-6 w-6" />
@@ -194,7 +190,7 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-foreground w-12 h-12"
+                className="text-muted-foreground hover:text-foreground justify-center w-12 h-12"
                 onClick={bottomActions[1].action}
               >
                 <LogOut className="h-6 w-6" />
@@ -205,7 +201,7 @@ export function Sidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-foreground w-12 h-12"
+              className="text-muted-foreground hover:text-foreground justify-center w-12 h-12"
               onClick={toggleCollapsed}
             >
               <PanelLeft

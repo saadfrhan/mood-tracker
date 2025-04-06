@@ -25,11 +25,11 @@ import {
   Activity,
   Heart,
   Smile,
-  Frown,
   Calendar as CalendarIcon,
   ArrowUp,
   ArrowDown,
   Info,
+  RefreshCcw,
 } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import { useState, useEffect } from "react";
@@ -42,11 +42,8 @@ import {
   startOfMonth,
   endOfMonth,
   differenceInDays,
-  isSameDay,
   isToday,
   isYesterday,
-  isThisWeek,
-  isThisMonth,
 } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +63,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+
+// Add cache-related constants
+const STATS_CACHE_KEY = "mood-tracker-stats-cache";
+const CACHE_EXPIRY = 1000 * 60 * 30; // 30 minutes in milliseconds
 
 interface MoodEntry {
   id: string;
@@ -105,6 +106,11 @@ interface StreakInfo {
   lastEntryDate: Date | null;
 }
 
+interface CacheData {
+  moodEntries: MoodEntry[];
+  timestamp: number;
+}
+
 export default function StatsPage() {
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
@@ -128,7 +134,7 @@ export default function StatsPage() {
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">(
     "month"
   );
-  const [allMoodEntries, setAllMoodEntries] = useState<MoodEntry[]>([]);
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
   const [averageMood, setAverageMood] = useState<number>(0);
   const [moodTrend, setMoodTrend] = useState<
     "improving" | "declining" | "stable"
@@ -171,6 +177,89 @@ export default function StatsPage() {
       description: "悪い気分",
     },
   ];
+
+  // Add cache functions
+  const getCachedData = (): CacheData | null => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const cachedData = localStorage.getItem(STATS_CACHE_KEY);
+      if (!cachedData) return null;
+
+      const parsedData: CacheData = JSON.parse(cachedData);
+
+      // Check if cache is expired
+      if (Date.now() - parsedData.timestamp > CACHE_EXPIRY) {
+        localStorage.removeItem(STATS_CACHE_KEY);
+        return null;
+      }
+
+      return parsedData;
+    } catch (error) {
+      console.error("Error reading from cache:", error);
+      return null;
+    }
+  };
+
+  const setCachedData = (data: MoodEntry[]) => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const cacheData: CacheData = {
+        moodEntries: data,
+        timestamp: Date.now(),
+      };
+
+      localStorage.setItem(STATS_CACHE_KEY, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error("Error writing to cache:", error);
+    }
+  };
+
+  // Fetch mood data
+  useEffect(() => {
+    const fetchMoodData = async () => {
+      if (status !== "authenticated") return;
+
+      try {
+        setIsLoading(true);
+
+        // Try to get data from cache first
+        const cachedData = getCachedData();
+        if (cachedData) {
+          console.log("Using cached mood data for stats");
+          setMoodEntries(cachedData.moodEntries);
+          setIsLoading(false);
+          return;
+        }
+
+        // If no cache, fetch from API
+        console.log("Fetching mood data from API for stats");
+        const response = await fetch("/api/mood");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch mood entries");
+        }
+
+        const data = await response.json();
+        setMoodEntries(data);
+
+        // Update cache with new data
+        setCachedData(data);
+      } catch (error) {
+        console.error("Error fetching mood entries:", error);
+        toast({
+          title: "エラーが発生しました",
+          description: "気分データの取得に失敗しました。",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMoodData();
+  }, [status]);
 
   useEffect(() => {
     const fetchMoodData = async () => {
@@ -225,7 +314,7 @@ export default function StatsPage() {
         }
 
         const yearEntries: MoodEntry[] = await yearResponse.json();
-        setAllMoodEntries(yearEntries);
+        setMoodEntries(yearEntries);
 
         // Calculate mood distribution
         const distribution = calculateMoodDistribution(currentMonthEntries);
@@ -534,8 +623,46 @@ export default function StatsPage() {
     return moods[value]?.label || "不明";
   };
 
+  // Add a function to manually refresh data
+  const refreshMoodData = async () => {
+    if (status !== "authenticated") return;
+
+    try {
+      setIsLoading(true);
+
+      // Clear cache to force a fresh fetch
+      localStorage.removeItem(STATS_CACHE_KEY);
+
+      const response = await fetch("/api/mood");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch mood entries");
+      }
+
+      const data = await response.json();
+      setMoodEntries(data);
+
+      // Update cache with new data
+      setCachedData(data);
+
+      toast({
+        title: "データを更新しました",
+        description: "最新の気分データを取得しました。",
+      });
+    } catch (error) {
+      console.error("Error refreshing mood entries:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "気分データの更新に失敗しました。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <header className="border-b border-[#e7e0d8] bg-white/50 backdrop-blur-sm sticky top-0 z-10 h-14">
         <div className="container flex items-center justify-between h-full px-4 md:px-6">
           <div className="flex items-center gap-2 md:hidden">
@@ -548,6 +675,20 @@ export default function StatsPage() {
             <h1 className="text-xl font-medium text-[#5d5a55]">統計</h1>
           </div>
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              onClick={refreshMoodData}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-pink-200 border-t-pink-500 mr-1"></div>
+              ) : (
+                <RefreshCcw className="h-3 w-3 mr-1" />
+              )}
+              更新
+            </Button>
             <Select
               value={timeRange}
               onValueChange={(value: "week" | "month" | "year") =>
@@ -1008,7 +1149,6 @@ export default function StatsPage() {
                       })}
                     >
                       記録を追加する
-                      {/* English: Add a record */}
                     </Link>
                   </CardFooter>
                 </Card>
@@ -1017,6 +1157,6 @@ export default function StatsPage() {
           </>
         )}
       </main>
-    </>
+    </div>
   );
 }

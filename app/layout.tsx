@@ -6,7 +6,7 @@ import { Noto_Sans_JP } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/components/auth-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const notoSansJP = Noto_Sans_JP({

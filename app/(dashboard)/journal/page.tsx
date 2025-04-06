@@ -10,6 +10,7 @@ import {
   Calendar,
   Clock,
   ChevronRight,
+  Sun,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect, useRef } from "react";
@@ -29,10 +30,19 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Add cache-related constants
+const JOURNAL_CACHE_KEY = "mood-tracker-journal-cache";
+const CACHE_EXPIRY = 1000 * 60 * 30; // 30 minutes in milliseconds
+
 interface JournalEntry {
   id: string;
   date: string;
   content: string;
+}
+
+interface CacheData {
+  journalEntries: JournalEntry[];
+  timestamp: number;
 }
 
 export default function JournalPage() {
@@ -47,6 +57,44 @@ export default function JournalPage() {
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Add cache functions
+  const getCachedData = (): CacheData | null => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const cachedData = localStorage.getItem(JOURNAL_CACHE_KEY);
+      if (!cachedData) return null;
+
+      const parsedData: CacheData = JSON.parse(cachedData);
+
+      // Check if cache is expired
+      if (Date.now() - parsedData.timestamp > CACHE_EXPIRY) {
+        localStorage.removeItem(JOURNAL_CACHE_KEY);
+        return null;
+      }
+
+      return parsedData;
+    } catch (error) {
+      console.error("Error reading from cache:", error);
+      return null;
+    }
+  };
+
+  const setCachedData = (data: JournalEntry[]) => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const cacheData: CacheData = {
+        journalEntries: data,
+        timestamp: Date.now(),
+      };
+
+      localStorage.setItem(JOURNAL_CACHE_KEY, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error("Error writing to cache:", error);
+    }
+  };
+
   // Fetch journal entries
   useEffect(() => {
     const fetchJournalEntries = async () => {
@@ -54,6 +102,18 @@ export default function JournalPage() {
 
       try {
         setIsLoading(true);
+
+        // Try to get data from cache first
+        const cachedData = getCachedData();
+        if (cachedData) {
+          console.log("Using cached journal data");
+          setJournalEntries(cachedData.journalEntries);
+          setIsLoading(false);
+          return;
+        }
+
+        // If no cache, fetch from API
+        console.log("Fetching journal data from API");
         const response = await fetch("/api/journal");
 
         if (!response.ok) {
@@ -62,6 +122,9 @@ export default function JournalPage() {
 
         const data = await response.json();
         setJournalEntries(data);
+
+        // Update cache with new data
+        setCachedData(data);
       } catch (error) {
         console.error("Error fetching journal entries:", error);
         toast({
@@ -120,7 +183,12 @@ export default function JournalPage() {
       const newEntry = await response.json();
 
       // Update entries list
-      setJournalEntries([newEntry, ...journalEntries]);
+      const updatedEntries = [newEntry, ...journalEntries];
+      setJournalEntries(updatedEntries);
+
+      // Update cache with new data
+      setCachedData(updatedEntries);
+
       setLastSaved(new Date());
       setIsDirty(false);
 
@@ -162,7 +230,12 @@ export default function JournalPage() {
 
       const newEntry = await response.json();
 
-      setJournalEntries([newEntry, ...journalEntries]);
+      const updatedEntries = [newEntry, ...journalEntries];
+      setJournalEntries(updatedEntries);
+
+      // Update cache with new data
+      setCachedData(updatedEntries);
+
       setJournalText("");
       setLastSaved(new Date());
       setIsDirty(false);
@@ -227,6 +300,44 @@ export default function JournalPage() {
     return groups;
   }, {} as Record<string, JournalEntry[]>);
 
+  // Add a function to manually refresh data
+  const refreshJournalData = async () => {
+    if (status !== "authenticated") return;
+
+    try {
+      setIsLoading(true);
+
+      // Clear cache to force a fresh fetch
+      localStorage.removeItem(JOURNAL_CACHE_KEY);
+
+      const response = await fetch("/api/journal");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch journal entries");
+      }
+
+      const data = await response.json();
+      setJournalEntries(data);
+
+      // Update cache with new data
+      setCachedData(data);
+
+      toast({
+        title: "データを更新しました",
+        description: "最新の日記データを取得しました。",
+      });
+    } catch (error) {
+      console.error("Error refreshing journal entries:", error);
+      toast({
+        title: "エラーが発生しました",
+        description: "日記データの更新に失敗しました。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-[#e7e0d8] bg-white/50 backdrop-blur-sm sticky top-0 z-10 h-14">
@@ -246,6 +357,20 @@ export default function JournalPage() {
             {/* English: Dashboard */}
           </div>
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs"
+              onClick={refreshJournalData}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-pink-200 border-t-pink-500 mr-1"></div>
+              ) : (
+                <Sun className="h-3 w-3 mr-1" />
+              )}
+              更新
+            </Button>
             <UserNav />
           </div>
         </div>
