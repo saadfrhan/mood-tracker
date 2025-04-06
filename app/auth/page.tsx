@@ -1,27 +1,32 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Cherry } from "lucide-react"
-import Link from "next/link"
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Cherry } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 export default function AuthPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/" })
+      await signIn("google", { callbackUrl: "/" });
     } catch (error) {
-      console.error("Authentication error:", error)
+      console.error("Authentication error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8f6f2] flex flex-col items-center justify-center p-4">
@@ -30,7 +35,8 @@ export default function AuthPage() {
           <div className="flex justify-center mb-2">
             <Cherry className="w-10 h-10 text-pink-500" />
           </div>
-          <CardTitle className="text-2xl">こころ日記</CardTitle> {/* English: Heart Diary */}
+          <CardTitle className="text-2xl">こころ日記</CardTitle>{" "}
+          {/* English: Heart Diary */}
           <CardDescription>毎日の気持ちを記録しましょう</CardDescription>{" "}
           {/* English: Let's record your daily feelings */}
         </CardHeader>
@@ -40,10 +46,18 @@ export default function AuthPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">ログイン</span> {/* English: Login */}
+              <span className="bg-white px-2 text-muted-foreground">
+                ログイン
+              </span>{" "}
+              {/* English: Login */}
             </div>
           </div>
-          <Button variant="outline" className="w-full h-12 border-2" onClick={handleGoogleSignIn} disabled={isLoading}>
+          <Button
+            variant="outline"
+            className="w-full h-12 border-2"
+            onClick={handleGoogleSignIn}
+            disabled={isLoading}
+          >
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent"></div>
@@ -51,7 +65,12 @@ export default function AuthPage() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
                     <path
                       fill="#4285F4"
@@ -71,29 +90,13 @@ export default function AuthPage() {
                     />
                   </g>
                 </svg>
-                <span>Googleで続ける</span> {/* English: Continue with Google */}
+                <span>Googleで続ける</span>{" "}
+                {/* English: Continue with Google */}
               </div>
             )}
           </Button>
         </CardContent>
-        <CardFooter className="flex flex-col gap-2 text-center text-sm text-muted-foreground">
-          <p>
-            続行することで、
-            <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
-              利用規約
-            </Link>{" "}
-            {/* English: Terms of Service */}
-            および
-            <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
-              プライバシーポリシー
-            </Link>{" "}
-            {/* English: Privacy Policy */}
-            に同意したことになります。
-          </p>{" "}
-          {/* English: By continuing, you agree to our Terms of Service and Privacy Policy. */}
-        </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-

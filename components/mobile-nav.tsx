@@ -26,11 +26,6 @@ const navItems = [
     href: "/stats",
     icon: BarChart3,
   },
-  // {
-  //   name: "設定" /* English: Settings */,
-  //   href: "/settings",
-  //   icon: Settings,
-  // },
 ];
 
 export function MobileNav() {
