@@ -389,9 +389,6 @@ export default async function CalendarPage({
                             }
                           )}
                         </div>
-                        <h3 className="text-base font-medium text-white drop-shadow-sm">
-                          {moods[selectedMoodDetails.moodValue].label}
-                        </h3>
                       </div>
                     </div>
 
@@ -408,19 +405,7 @@ export default async function CalendarPage({
                               selectedMoodDetails.moodValue + 1
                             }/5`}
                           >
-                            {[0, 1, 2, 3, 4].map((level) => (
-                              <div
-                                key={level}
-                                className={`w-6 h-2 rounded-full ${
-                                  level <= selectedMoodDetails.moodValue
-                                    ? moods[
-                                        selectedMoodDetails.moodValue
-                                      ].color.replace("text", "bg")
-                                    : "bg-gray-200"
-                                }`}
-                                aria-hidden="true"
-                              />
-                            ))}
+                            {moods[selectedMoodDetails.moodValue].label}
                           </div>
                         </div>
 
@@ -495,7 +480,7 @@ export default async function CalendarPage({
                         <Button
                           variant="outline"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 justify-center"
                         >
                           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                         </Button>
@@ -507,7 +492,7 @@ export default async function CalendarPage({
                         <Button
                           variant="outline"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 justify-center"
                         >
                           <ChevronRight
                             className="h-4 w-4"

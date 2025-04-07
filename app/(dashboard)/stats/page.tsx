@@ -689,6 +689,19 @@ export default function StatsPage() {
               )}
               更新
             </Button>
+            <UserNav />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 container py-8 px-4 md:px-6 max-w-5xl">
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500"></div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Summary Cards */}
             <Select
               value={timeRange}
               onValueChange={(value: "week" | "month" | "year") =>
@@ -704,19 +717,6 @@ export default function StatsPage() {
                 <SelectItem value="year">年間</SelectItem>
               </SelectContent>
             </Select>
-            <UserNav />
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 container py-8 px-4 md:px-6 max-w-5xl">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500"></div>
-          </div>
-        ) : (
-          <>
-            {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm">
                 <CardHeader className="pb-2">
@@ -1154,7 +1154,7 @@ export default function StatsPage() {
                 </Card>
               </TabsContent>
             </Tabs>
-          </>
+          </div>
         )}
       </main>
     </div>

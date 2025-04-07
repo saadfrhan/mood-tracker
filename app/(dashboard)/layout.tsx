@@ -14,6 +14,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <Sidebar />
         <div className="flex-1 flex flex-col">
+          {children}
           <MobileNav />
         </div>
       </SidebarProvider>

@@ -10,7 +10,7 @@ import {
   Calendar,
   Clock,
   ChevronRight,
-  Sun,
+  RefreshCcw,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect, useRef } from "react";
@@ -367,9 +367,9 @@ export default function JournalPage() {
               {isLoading ? (
                 <div className="h-3 w-3 animate-spin rounded-full border-2 border-pink-200 border-t-pink-500 mr-1"></div>
               ) : (
-                <Sun className="h-3 w-3 mr-1" />
+                <RefreshCcw className="h-3 w-3 mr-1" />
               )}
-              更新
+              <p className="max-md:hidden">更新</p>
             </Button>
             <UserNav />
           </div>

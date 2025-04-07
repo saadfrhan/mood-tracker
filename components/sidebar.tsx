@@ -93,28 +93,19 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ease-in-out h-dvh overflow-hidden sticky top-0 z-30",
+        "hidden md:flex flex-col border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-dvh overflow-hidden sticky top-0 z-30",
         collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Header with app logo */}
       <div className="flex h-14 items-center border-b px-4">
-        <Link
-          href="/"
-          className={cn(
-            "flex items-center gap-2 font-semibold transition-all duration-300 ease-in-out",
-            collapsed ? "justify-center w-full" : "justify-start"
-          )}
-        >
+        <Link href="/" className="flex items-center gap-2 font-semibold">
           <Cherry className="h-6 w-6 text-pink-500" />
-          <span
-            className={cn(
-              "text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent transition-all duration-300 ease-in-out",
-              collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
-            )}
-          >
-            こころ日記
-          </span>
+          {!collapsed && (
+            <span className="text-lg font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+              こころ日記
+            </span>
+          )}
         </Link>
       </div>
 
@@ -131,7 +122,7 @@ export function Sidebar() {
                     variant: "ghostStart",
                     size: collapsed ? "icon" : "default",
                     className: cn(
-                      "items-start w-full",
+                      "items-start w-full p-0",
                       !collapsed && "justify-start",
                       collapsed && "justify-center",
                       isActive &&
@@ -142,7 +133,7 @@ export function Sidebar() {
                   <item.icon
                     className={cn(
                       "w-6 h-6",
-                      collapsed && "w-8 h-8",
+                      collapsed && "w-12 h-12",
                       isActive && "text-pink-700"
                     )}
                   />
