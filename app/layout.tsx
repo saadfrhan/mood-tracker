@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   description:
     "あなたの毎日の気持ちを記録するアプリ" /* English: An app to record your daily feelings */,
   verification: {
-    google: "QJdnK7T6QVvD6oibY48EDSeHQfIADyGxivCXQaYBTYQ",
+    google: "IJbyFBkj1SXf2oxIpv8_CHj9hnh0HHXHmfwhuhg3xag",
   },
 };
 
