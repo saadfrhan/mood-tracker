@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     "こころ日記 - 気分トラッカー" /* English: Heart Diary - Mood Tracker */,
   description:
     "あなたの毎日の気持ちを記録するアプリ" /* English: An app to record your daily feelings */,
+  verification: {
+    google: "QJdnK7T6QVvD6oibY48EDSeHQfIADyGxivCXQaYBTYQ",
+  },
 };
 
 export default function RootLayout({
