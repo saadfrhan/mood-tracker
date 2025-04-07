@@ -687,7 +687,7 @@ export default function StatsPage() {
               ) : (
                 <RefreshCcw className="h-3 w-3 mr-1" />
               )}
-              更新
+              <p className="max-md:hidden">更新</p>
             </Button>
             <UserNav />
           </div>
