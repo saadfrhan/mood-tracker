@@ -88,7 +88,7 @@ export const metadata: Metadata = {
     description: "毎日の気分を記録して、あなたの心の健康を管理しましょう。",
   },
   alternates: {
-    canonical: "https://kokoro-diary.com/calendar",
+    canonical: "https://heart-diary.com/calendar",
   },
 };
 

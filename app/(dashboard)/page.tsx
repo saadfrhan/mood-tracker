@@ -23,10 +23,9 @@ import {
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { format, isSameDay, subDays, parseISO } from "date-fns";
-import { ja } from "date-fns/locale";
 import { useSession } from "next-auth/react";
 import { UserNav } from "@/components/user-nav";
-import { Badge } from "@/components/ui/badge";
+import { MoodLogger } from "@/components/mood-logger";
 
 // Add cache-related constants
 const CACHE_KEY = "mood-tracker-cache";
@@ -556,136 +555,10 @@ export default function HomePage() {
         </header>
 
         <main className="flex-1 container py-4 px-4 md:px-6 max-w-8xl mx-auto">
-          {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-fit">
-            {/* Today's Mood Section - Left Column */}
+            {/* Mood Logger Section */}
             <div className="lg:col-span-1">
-              <Card className="border-none shadow-sm bg-white/80 backdrop-blur-sm overflow-hidden h-full">
-                <CardHeader className="pb-1 pt-3">
-                  <CardTitle className="text-[#5d5a55] text-base">
-                    今日の気分
-                    {/* English: Today's Mood */}
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    今の気持ちを記録しましょう
-                    {/* English: Record your current mood */}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-1">
-                  {isLoading ? (
-                    <div className="flex justify-center items-center py-4">
-                      <div className="h-6 w-6 animate-spin rounded-full border-3 border-pink-200 border-t-pink-500"></div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-5 gap-1">
-                        {moods.map((mood, index) => {
-                          const Icon = mood.icon;
-                          return (
-                            <Button
-                              key={index}
-                              variant="outline"
-                              className={`flex flex-col h-auto py-2 gap-1 border border-[#e7e0d8] ${
-                                mood.hoverBg
-                              } ${mood.hoverText} ${
-                                mood.hoverBorder
-                              } transition-all ${
-                                selectedMood === index
-                                  ? "bg-pink-50 border-pink-200 ring-1 ring-pink-200"
-                                  : ""
-                              }`}
-                              onClick={() => {
-                                handleMoodSelection(index);
-                                setIsExpanded(true);
-                              }}
-                            >
-                              <div
-                                className={`w-8 h-8 rounded-full ${mood.bgColor} flex items-center justify-center`}
-                              >
-                                <Icon className={`w-4 h-4 ${mood.color}`} />
-                              </div>
-                              <span className="text-xs font-medium">
-                                {mood.label}
-                              </span>
-                            </Button>
-                          );
-                        })}
-                      </div>
-
-                      {isExpanded && (
-                        <div className="space-y-2 pt-2 border-t border-[#e7e0d8]">
-                          <div className="space-y-1">
-                            <label
-                              htmlFor="mood-note"
-                              className="text-xs font-medium"
-                            >
-                              メモ
-                            </label>
-                            <textarea
-                              id="mood-note"
-                              className="w-full min-h-[60px] rounded-md border border-[#e7e0d8] bg-transparent px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-pink-400"
-                              placeholder="今日の気分についてメモを残しましょう..."
-                              value={note}
-                              onChange={(e) => setNote(e.target.value)}
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-xs font-medium">タグ</label>
-                            <div className="flex flex-wrap gap-1">
-                              {moodTags.map((tag, index) => (
-                                <button
-                                  key={index}
-                                  type="button"
-                                  onClick={() => toggleTag(tag)}
-                                  className={`px-1.5 py-0.5 text-xs rounded-full border transition-colors ${
-                                    selectedTags.includes(tag)
-                                      ? "bg-pink-100 border-pink-200 text-pink-700"
-                                      : "border-[#e7e0d8] hover:bg-pink-50"
-                                  }`}
-                                >
-                                  {tag}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="flex justify-end gap-2 pt-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs h-7 px-2"
-                              onClick={() => {
-                                setIsExpanded(false);
-                                setSelectedMood(null);
-                                setNote("");
-                                setSelectedTags([]);
-                              }}
-                            >
-                              キャンセル
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="bg-pink-400 hover:bg-pink-500 text-white text-xs h-7 px-2"
-                              onClick={handleSubmit}
-                              disabled={isSubmitting}
-                            >
-                              {isSubmitting ? (
-                                <div className="flex items-center gap-1">
-                                  <div className="h-2 w-2 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                  <span>記録中...</span>
-                                </div>
-                              ) : (
-                                "記録する"
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <MoodLogger />
             </div>
 
             {/* Calendar and Weekly View - Middle and Right Columns */}
@@ -705,132 +578,6 @@ export default function HomePage() {
                     <div className="grid grid-cols-7 gap-0.5 mb-2">
                       {renderCalendarDays()}
                     </div>
-
-                    {selectedDate && (
-                      <div className="pt-2 border-t border-[#e7e0d8]">
-                        <h3 className="text-xs font-medium mb-1">
-                          {format(selectedDate, "yyyy年MM月dd日 (EEEE)", {
-                            locale: ja,
-                          })}
-                        </h3>
-
-                        {selectedDate &&
-                        format(selectedDate, "yyyy-MM-dd") in moodEntries ? (
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className={`w-8 h-8 rounded-full ${
-                                  moods[
-                                    moodEntries[
-                                      format(selectedDate, "yyyy-MM-dd")
-                                    ]
-                                  ].bgColor
-                                } flex items-center justify-center`}
-                              >
-                                {React.createElement(
-                                  moods[
-                                    moodEntries[
-                                      format(selectedDate, "yyyy-MM-dd")
-                                    ]
-                                  ].icon,
-                                  {
-                                    className: `w-4 h-4 ${
-                                      moods[
-                                        moodEntries[
-                                          format(selectedDate, "yyyy-MM-dd")
-                                        ]
-                                      ].color
-                                    }`,
-                                  }
-                                )}
-                              </div>
-                              <div>
-                                <p className="font-medium text-xs">
-                                  {
-                                    moods[
-                                      moodEntries[
-                                        format(selectedDate, "yyyy-MM-dd")
-                                      ]
-                                    ].label
-                                  }
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {isSameDay(selectedDate, new Date())
-                                    ? "今日"
-                                    : format(selectedDate, "MM月dd日")}
-                                  の気分
-                                </p>
-                              </div>
-                            </div>
-
-                            {selectedMoodDetails && (
-                              <>
-                                {selectedMoodDetails.note && (
-                                  <div className="pt-1 text-xs">
-                                    <p className="whitespace-pre-wrap">
-                                      {selectedMoodDetails.note}
-                                    </p>
-                                  </div>
-                                )}
-
-                                {selectedMoodDetails.tags &&
-                                  selectedMoodDetails.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 pt-1">
-                                      {selectedMoodDetails.tags.map(
-                                        (tag, index) => (
-                                          <Badge
-                                            key={index}
-                                            variant="outline"
-                                            className="bg-pink-50 text-pink-700 border-pink-200 text-xs px-1 py-0"
-                                          >
-                                            <Tag className="w-3 h-3 mr-0.5" />
-                                            {tag}
-                                          </Badge>
-                                        )
-                                      )}
-                                    </div>
-                                  )}
-                              </>
-                            )}
-
-                            {isSameDay(selectedDate, new Date()) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="mt-1 self-end text-xs h-6 px-1.5"
-                                onClick={() => {
-                                  setIsExpanded(true);
-                                  if (selectedMoodDetails) {
-                                    setNote(selectedMoodDetails.note || "");
-                                    setSelectedTags(
-                                      selectedMoodDetails.tags || []
-                                    );
-                                  }
-                                }}
-                              >
-                                編集する
-                              </Button>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-center py-1">
-                            {isSameDay(selectedDate, new Date()) ? (
-                              <Button
-                                size="sm"
-                                className="bg-pink-400 hover:bg-pink-500 text-white text-xs h-6 px-1.5"
-                                onClick={() => setIsExpanded(true)}
-                              >
-                                今日の気分を記録する
-                              </Button>
-                            ) : (
-                              <p className="text-muted-foreground text-xs">
-                                この日の記録はありません
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
 
@@ -883,10 +630,6 @@ export default function HomePage() {
                             </div>
                           )
                         )}
-                      </div>
-                      <div className="text-xs text-muted-foreground text-center">
-                        今週は{moods[weeklyMoodIndices[6] || 2].label}
-                        の気分が多かったです
                       </div>
                     </div>
                   </CardContent>
